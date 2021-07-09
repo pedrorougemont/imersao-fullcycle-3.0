@@ -4,13 +4,22 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/pedrorougemont/codebank/infrastructure/grpc/server"
 	"github.com/pedrorougemont/codebank/infrastructure/kafka"
 	"github.com/pedrorougemont/codebank/infrastructure/repository"
 	"github.com/pedrorougemont/codebank/usecase"
 )
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+}
 
 func main() {
 	db := setupDb()
@@ -21,12 +30,12 @@ func main() {
 }
 
 func setupDb() *sql.DB {
-	psqlInfo := fmt.Sprintf("host= %s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		"db",
-		5432,
-		"postgres",
-		"root",
-		"codebank",
+	psqlInfo := fmt.Sprintf("host= %s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("host"),
+		os.Getenv("port"),
+		os.Getenv("user"),
+		os.Getenv("password"),
+		os.Getenv("dbname"),
 	)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -37,7 +46,7 @@ func setupDb() *sql.DB {
 
 func setupKafkaProducer() kafka.KafkaProducer {
 	producer := kafka.NewKafkaProducer()
-	producer.SetupProducer("host.docker.internal:9094")
+	producer.SetupProducer(os.Getenv("KafkaBootstrapServers"))
 	return producer
 }
 
