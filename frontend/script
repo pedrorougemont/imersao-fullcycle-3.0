@@ -1,0 +1,4 @@
+npx create-next-app --typescript
+npm run dev
+docker-compose -f compose-node.yaml up
+npm install @material-ui/core @material-ui/icons axios --save
